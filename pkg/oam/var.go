@@ -18,5 +18,6 @@ package oam
 
 // SystemDefinitonNamespace golbal value for controller and webhook systemlevel namespace
 var (
+	// SystemDefinitonNamespace 全局系统的命名空间
 	SystemDefinitonNamespace string = "vela-system"
 )

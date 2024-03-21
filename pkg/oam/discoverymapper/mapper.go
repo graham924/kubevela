@@ -37,7 +37,9 @@ var _ DiscoveryMapper = &DefaultDiscoveryMapper{}
 
 // DefaultDiscoveryMapper is a K8s resource mapper for discovery, it will cache the result
 type DefaultDiscoveryMapper struct {
-	dc     *discovery.DiscoveryClient
+	// dc k8s的DiscoveryClient客户端，用于检索 kuberentes集群中支持的 API 资源的相关信息
+	dc *discovery.DiscoveryClient
+	// mapper 资源映射包含GVK和GVR等相互映射方法
 	mapper meta.RESTMapper
 }
 

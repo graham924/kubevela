@@ -35,6 +35,9 @@ import (
 
 // Setup workload controllers.
 func Setup(mgr ctrl.Manager, args controller.Args, l logging.Logger) error {
+	// 创建一个 func(ctrl.Manager, controller.Args, logging.Logger) error 类型的切片
+	// 遍历切片中的每一个方法，依次调用
+	// 每一个方法都是一个 controller 的 Setup 方法
 	for _, setup := range []func(ctrl.Manager, controller.Args, logging.Logger) error{
 		containerizedworkload.Setup, manualscalertrait.Setup, healthscope.Setup,
 		application.Setup, applicationrollout.Setup, applicationcontext.Setup, appdeployment.Setup,
@@ -44,6 +47,7 @@ func Setup(mgr ctrl.Manager, args controller.Args, l logging.Logger) error {
 			return err
 		}
 	}
+	// 如果controller参数中 ApplicationConfigurationInstalled 为 true，则也安装 applicationconfiguration
 	if args.ApplicationConfigurationInstalled {
 		return applicationconfiguration.Setup(mgr, args, l)
 	}

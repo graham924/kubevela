@@ -151,6 +151,7 @@ func SelectOAMAppLabelsWithoutRevision(labels map[string]string) map[string]stri
 }
 
 // CheckDisabledCapabilities checks whether the disabled capability controllers are valid
+// 检查禁用的 capability controllers 是否合法
 func CheckDisabledCapabilities(disableCaps string) error {
 	switch disableCaps {
 	case common.DisableNoneCaps:
@@ -159,6 +160,7 @@ func CheckDisabledCapabilities(disableCaps string) error {
 		return nil
 	default:
 		for _, c := range strings.Split(disableCaps, ",") {
+			// 内置了4个功能，判断禁用功能是否属于其中
 			if !allBuiltinCapabilities.Contains(c) {
 				return fmt.Errorf("%s in disable caps list is not built-in", c)
 			}
@@ -168,6 +170,7 @@ func CheckDisabledCapabilities(disableCaps string) error {
 }
 
 // StoreInSet stores items in Set
+// 将 禁用功能的参数 切割 成一个 set
 func StoreInSet(disableCaps string) mapset.Set {
 	var disableSlice []interface{}
 	for _, c := range strings.Split(disableCaps, ",") {

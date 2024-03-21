@@ -30,6 +30,7 @@ import (
 
 // Register will be called in main and register all validation handlers
 func Register(mgr manager.Manager, args controller.Args) {
+	// 依次注册所有的webhook
 	application.RegisterValidatingHandler(mgr, args)
 	applicationconfiguration.RegisterValidatingHandler(mgr, args)
 	traitdefinition.RegisterValidatingHandler(mgr, args)
@@ -39,6 +40,7 @@ func Register(mgr manager.Manager, args controller.Args) {
 	component.RegisterMutatingHandler(mgr, args)
 	component.RegisterValidatingHandler(mgr)
 
+	// 获取manager实例的webhook server，注册一个 转换webhook
 	server := mgr.GetWebhookServer()
 	server.Register("/convert", &conversion.Webhook{})
 }
