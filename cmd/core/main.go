@@ -20,6 +20,8 @@ import (
 	"errors"
 	"flag"
 	"fmt"
+	"github.com/crossplane/crossplane-runtime/pkg/logging"
+	oamv1alpha2 "github.com/oam-dev/kubevela/pkg/controller/core.oam.dev/v1alpha2"
 	"io"
 	"os"
 	"os/signal"
@@ -29,7 +31,6 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/crossplane/crossplane-runtime/pkg/logging"
 	injectorcontroller "github.com/oam-dev/trait-injector/controllers"
 	"github.com/oam-dev/trait-injector/pkg/injector"
 	"github.com/oam-dev/trait-injector/pkg/plugin"
@@ -41,7 +42,6 @@ import (
 
 	standardcontroller "github.com/oam-dev/kubevela/pkg/controller"
 	oamcontroller "github.com/oam-dev/kubevela/pkg/controller/core.oam.dev"
-	oamv1alpha2 "github.com/oam-dev/kubevela/pkg/controller/core.oam.dev/v1alpha2"
 	"github.com/oam-dev/kubevela/pkg/controller/utils"
 	"github.com/oam-dev/kubevela/pkg/dsl/definition"
 	"github.com/oam-dev/kubevela/pkg/oam"

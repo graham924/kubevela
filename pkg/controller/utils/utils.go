@@ -180,6 +180,7 @@ func StoreInSet(disableCaps string) mapset.Set {
 }
 
 // GetAppNextRevision will generate the next revision name and revision number for application
+// 根据application的 Name + 最新修订号，生成下一个修订号。格式例如：comp-v2
 func GetAppNextRevision(app *v1beta1.Application) (string, int64) {
 	if app == nil {
 		// should never happen

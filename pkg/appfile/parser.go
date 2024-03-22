@@ -154,9 +154,12 @@ func (trait *Trait) EvalHealth(ctx process.Context, client client.Client, namesp
 
 // Appfile describes application
 type Appfile struct {
-	Name         string
+	// Name application的名称
+	Name string
+	// RevisionName 当前Application资源的修订资源名称
 	RevisionName string
-	Workloads    []*Workload
+	// Workloads 记录application的所有workload
+	Workloads []*Workload
 }
 
 // TemplateValidate validate Template format
@@ -181,9 +184,13 @@ func NewApplicationParser(cli client.Client, dm discoverymapper.DiscoveryMapper,
 }
 
 // GenerateAppFile converts an application to an Appfile
+// 解析application，并生成一个Appfile
 func (p *Parser) GenerateAppFile(ctx context.Context, name string, app *v1beta1.Application) (*Appfile, error) {
+	// 新建一个Appfile
 	appfile := new(Appfile)
+	// 设置 appfile.Name
 	appfile.Name = name
+	// 遍历 application.Spec.Components，解析每一个组件，得到一个Workload数组
 	var wds []*Workload
 	for _, comp := range app.Spec.Components {
 		wd, err := p.parseWorkload(ctx, comp)
@@ -192,10 +199,13 @@ func (p *Parser) GenerateAppFile(ctx context.Context, name string, app *v1beta1.
 		}
 		wds = append(wds, wd)
 	}
+	// 将解析得到的workload数组，赋值给 appfile.Workloads
 	appfile.Workloads = wds
+	// 返回解析得到的Appfile
 	return appfile, nil
 }
 
+// parseWorkload 将 ApplicationComponent 解析成一个Workload
 func (p *Parser) parseWorkload(ctx context.Context, comp v1beta1.ApplicationComponent) (*Workload, error) {
 
 	templ, err := util.LoadTemplate(ctx, p.dm, p.client, comp.Type, types.TypeComponentDefinition)

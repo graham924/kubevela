@@ -166,20 +166,32 @@ func (h *appHandler) compareWithLastRevisionSpec(ctx context.Context, newAppRevi
 
 // GenerateAppRevision will generate a pure revision without metadata and rendered result
 // the generated revision will be compare with the last revision to see if there's any difference.
+// 根据 handler 中的 application 和 appfile，生成一个修订资源 ApplicationRevision
 func (h *appHandler) GenerateAppRevision(ctx context.Context) (*v1beta1.ApplicationRevision, error) {
+	// 解析 application 和 appfile，得到填充好 Spec 的 ApplicationRevision 对象
+	// 同时，计算一个 revision hash，用于唯一标记一个版本，也用于比较
 	appRev, appRevisionHash, err := h.gatherRevisionSpec()
 	if err != nil {
 		return nil, err
 	}
+	// 比较最新的修订版本，和当前appRev的Spec，是否有所不同，确定 是否真的是 新版本
 	isNewRev, err := h.compareWithLastRevisionSpec(ctx, appRevisionHash, appRev)
 	if err != nil {
 		return appRev, err
 	}
+
+	// 是新版本
 	if isNewRev {
+		// 设置appRev的名称，新版本的名称为 application.Name + "-v1"，最后的数字递增
 		appRev.Name, _ = utils.GetAppNextRevision(h.app)
 	}
+
+	// appHandler 记录 isNewRevision 的值
 	h.isNewRevision = isNewRev
+
+	// appHandler 记录 revisionHash 的值
 	h.revisionHash = appRevisionHash
+
 	return appRev, nil
 }
 
@@ -245,6 +257,7 @@ func DeepEqualRevision(old, new *v1beta1.ApplicationRevision) bool {
 
 // ComputeAppRevisionHash computes a single hash value for an appRevision object
 // Spec of Application/WorkloadDefinitions/ComponentDefinitions/TraitDefinitions/ScopeDefinitions will be taken into compute
+// 根据 ApplicationRevision 对象，计算一个 hash 值
 func ComputeAppRevisionHash(appRevision *v1beta1.ApplicationRevision) (string, error) {
 	// we first constructs a AppRevisionHash structure to store all the meaningful spec hashes
 	// and avoid computing the annotations. Those fields are all read from k8s already so their

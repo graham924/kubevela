@@ -30,7 +30,7 @@ type ApplicationRevisionSpec struct {
 	// Application records the snapshot of the created/modified Application
 	Application Application `json:"application"`
 
-	// ComponentDefinitions records the snapshot of the componentDefinitions related with the created/modified Application
+	// ComponentDefinitions records the snapshot of the componentDefinitions related with the created/modified Application，key是Component的类型
 	ComponentDefinitions map[string]ComponentDefinition `json:"componentDefinitions,omitempty"`
 
 	// WorkloadDefinitions records the snapshot of the workloadDefinitions related with the created/modified Application
@@ -55,6 +55,7 @@ type ApplicationRevisionSpec struct {
 // +kubebuilder:object:root=true
 
 // ApplicationRevision is the Schema for the ApplicationRevision API
+// ApplicationRevision 是Application的修订版本。Application每次修订，都会生成一个ApplicationRevision
 // +kubebuilder:storageversion
 type ApplicationRevision struct {
 	metav1.TypeMeta   `json:",inline"`

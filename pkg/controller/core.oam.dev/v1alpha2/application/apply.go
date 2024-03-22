@@ -47,6 +47,7 @@ import (
 	oamutil "github.com/oam-dev/kubevela/pkg/oam/util"
 )
 
+// errorCondition 根据参数，封装一个 表示error的condition
 func errorCondition(tpy string, err error) runtimev1alpha1.Condition {
 	return runtimev1alpha1.Condition{
 		Type:               runtimev1alpha1.ConditionType(tpy),
@@ -57,6 +58,7 @@ func errorCondition(tpy string, err error) runtimev1alpha1.Condition {
 	}
 }
 
+// readyCondition 根据参数，封装一个 表示ready的condition
 func readyCondition(tpy string) runtimev1alpha1.Condition {
 	return runtimev1alpha1.Condition{
 		Type:               runtimev1alpha1.ConditionType(tpy),
@@ -66,14 +68,21 @@ func readyCondition(tpy string) runtimev1alpha1.Condition {
 	}
 }
 
+// appHandler application的处理器
 type appHandler struct {
-	r             *Reconciler
-	app           *v1beta1.Application
-	appfile       *appfile.Appfile
-	logger        logr.Logger
-	inplace       bool
+	// r 调谐器对象
+	r *Reconciler
+	// app 要操作的application对象
+	app *v1beta1.Application
+	// appfile 要操作的application对象，解析得到的 appfile
+	appfile *appfile.Appfile
+	// logger 日志记录器
+	logger  logr.Logger
+	inplace bool
+	// isNewRevision 记录当前application是否发生了改变，即是否为最新修订版本
 	isNewRevision bool
-	revisionHash  string
+	// revisionHash 记录当前application revision 的hash值
+	revisionHash string
 }
 
 // setInplace will mark if the application should upgrade the workload within the same instance(name never changed)
@@ -81,6 +90,7 @@ func (h *appHandler) setInplace(isInplace bool) {
 	h.inplace = isInplace
 }
 
+// handleErr 处理错误的公共方法，定时后重新入队
 func (h *appHandler) handleErr(err error) (ctrl.Result, error) {
 	nerr := h.r.UpdateStatus(context.Background(), h.app)
 	if err == nil && nerr == nil {
@@ -494,7 +504,9 @@ func checkResourceDiffWithApp(u *unstructured.Unstructured, appNs string) bool {
 }
 
 // finalizeResourceTracker func return whether need to update application
+// removeResourceTracker 移除 appHandler 中 application 对象的 ResourceTracker 和 finalizer
 func (h *appHandler) removeResourceTracker(ctx context.Context) (bool, error) {
+	// 从调谐器 Reconciler 中获取 Client
 	client := h.r.Client
 	rt := new(v1beta1.ResourceTracker)
 	trackerName := h.generateResourceTrackerName()

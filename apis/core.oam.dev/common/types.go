@@ -203,7 +203,7 @@ type AppStatus struct {
 	// Services record the status of the application services
 	Services []ApplicationComponentStatus `json:"services,omitempty"`
 
-	// ResourceTracker record the status of the ResourceTracker
+	// ResourceTracker record the status of the ResourceTracker 记录当前Application对象需要追踪的资源
 	ResourceTracker *v1alpha12.TypedReference `json:"resourceTracker,omitempty"`
 
 	// LatestRevision of the application configuration it generates
