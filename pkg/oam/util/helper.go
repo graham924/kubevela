@@ -290,17 +290,27 @@ func SetNamespaceInCtx(ctx context.Context, namespace string) context.Context {
 
 // GetDefinition get definition from two level namespace
 func GetDefinition(ctx context.Context, cli client.Reader, definition runtime.Object, definitionName string) error {
+	// 根据环境变量 DEFINITION_NAMESPACE 和 definitionName 从环境中获取 definition 资源
 	if dns := os.Getenv(DefinitionNamespaceEnv); dns != "" {
+		// 如果 DEFINITION_NAMESPACE 环境变量存在且不为空，则尝试从该命名空间中获取 definition 资源
 		if err := cli.Get(ctx, types.NamespacedName{Name: definitionName, Namespace: dns}, definition); err == nil {
+			// 获取成功，则直接返回 nil
 			return nil
 		} else if !apierrors.IsNotFound(err) {
+			// 如果获取失败且不是未找到错误，则返回错误
 			return err
 		}
 	}
+
+	// 如果 DEFINITION_NAMESPACE 为空，则调用 GetDefinitionNamespaceWithCtx 函数获取命名空间
 	appNs := GetDefinitionNamespaceWithCtx(ctx)
+	// 尝试从该命名空间中获取 definition 资源
 	if err := cli.Get(ctx, types.NamespacedName{Name: definitionName, Namespace: appNs}, definition); err != nil {
+		// 如果获取失败且是未找到错误
 		if apierrors.IsNotFound(err) {
+			// 尝试从系统定义命名空间中获取 definition 资源
 			if err = cli.Get(ctx, types.NamespacedName{Name: definitionName, Namespace: oam.SystemDefinitonNamespace}, definition); err != nil {
+				// 如果仍然没找到，则尝试从集群范围内获取资源
 				if apierrors.IsNotFound(err) {
 					// compatibility code for old clusters those definition crd is cluster scope
 					var newErr error
@@ -311,10 +321,12 @@ func GetDefinition(ctx context.Context, cli client.Reader, definition runtime.Ob
 				}
 				return err
 			}
+			// 如果获取成功，err被赋值为nil，直接返回
 			return err
 		}
 		return err
 	}
+	// 获取成功，则直接返回 nil
 	return nil
 }
 

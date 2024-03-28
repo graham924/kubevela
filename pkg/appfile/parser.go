@@ -188,15 +188,17 @@ func NewApplicationParser(cli client.Client, dm discoverymapper.DiscoveryMapper,
 func (p *Parser) GenerateAppFile(ctx context.Context, name string, app *v1beta1.Application) (*Appfile, error) {
 	// 新建一个Appfile
 	appfile := new(Appfile)
-	// 设置 appfile.Name
+	// 设置 appfile.Name，和app的名称一致
 	appfile.Name = name
-	// 遍历 application.Spec.Components，解析每一个组件，得到一个Workload数组
+	// 遍历 application.Spec.Components，得到一个Workload数组
 	var wds []*Workload
 	for _, comp := range app.Spec.Components {
+		// 解析每一个组件，得到Workload对象
 		wd, err := p.parseWorkload(ctx, comp)
 		if err != nil {
 			return nil, err
 		}
+		// 将解析得到的workload，添加到 wds数组 中
 		wds = append(wds, wd)
 	}
 	// 将解析得到的workload数组，赋值给 appfile.Workloads
@@ -207,15 +209,17 @@ func (p *Parser) GenerateAppFile(ctx context.Context, name string, app *v1beta1.
 
 // parseWorkload 将 ApplicationComponent 解析成一个Workload
 func (p *Parser) parseWorkload(ctx context.Context, comp v1beta1.ApplicationComponent) (*Workload, error) {
-
+	// 根据comp中包含的能力类型，加载对应的能力对象模板
 	templ, err := util.LoadTemplate(ctx, p.dm, p.client, comp.Type, types.TypeComponentDefinition)
 	if err != nil && !kerrors.IsNotFound(err) {
 		return nil, errors.WithMessagef(err, "fetch type of %s", comp.Name)
 	}
+	// 将comp.Properties，转成map[string]interface{}结构
 	settings, err := util.RawExtension2Map(&comp.Properties)
 	if err != nil {
 		return nil, errors.WithMessagef(err, "fail to parse settings for %s", comp.Name)
 	}
+	// 创建一个Workload对象，将comp的属性，赋值给workload.Params
 	workload := &Workload{
 		Traits:              []*Trait{},
 		Name:                comp.Name,
@@ -230,6 +234,7 @@ func (p *Parser) parseWorkload(ctx context.Context, comp v1beta1.ApplicationComp
 		Params:              settings,
 		engine:              definition.NewWorkloadAbstractEngine(comp.Name, p.pd),
 	}
+	// 设置workload.Traits
 	for _, traitValue := range comp.Traits {
 		properties, err := util.RawExtension2Map(&traitValue.Properties)
 		if err != nil {
@@ -242,6 +247,7 @@ func (p *Parser) parseWorkload(ctx context.Context, comp v1beta1.ApplicationComp
 
 		workload.Traits = append(workload.Traits, trait)
 	}
+	// 设置workload.Scopes
 	for scopeType, instanceName := range comp.Scopes {
 		gvk, err := util.GetScopeGVK(ctx, p.client, p.dm, scopeType)
 		if err != nil {

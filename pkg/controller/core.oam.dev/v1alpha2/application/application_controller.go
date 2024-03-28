@@ -178,6 +178,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		// 处理错误公共逻辑
 		return handler.handleErr(err)
 	}
+
 	// Record the revision so it can be used to render data in context.appRevision
 	// 生成了修订资源 ApplicationRevision，将修订资源名称，设置到 appfile.RevisionName
 	generatedAppfile.RevisionName = appRev.Name
@@ -263,13 +264,19 @@ func registerFinalizers(app *v1beta1.Application) bool {
 }
 
 // UpdateStatus updates v1beta1.Application's Status with retry.RetryOnConflict
+// 更新app的status
 func (r *Reconciler) UpdateStatus(ctx context.Context, app *v1beta1.Application, opts ...client.UpdateOption) error {
+	// 深拷贝获取应用的状态
 	status := app.DeepCopy().Status
+	// 使用重试机制来更新应用状态，使用了默认的退避策略，当更新发生冲突时会进行重试
 	return retry.RetryOnConflict(retry.DefaultBackoff, func() (err error) {
+		// 从kubernetes环境中获取最新的app对象，覆盖app
 		if err = r.Get(ctx, types.NamespacedName{Namespace: app.Namespace, Name: app.Name}, app); err != nil {
 			return
 		}
+		// 将更改后的status，覆盖app的status
 		app.Status = status
+		// 更新环境中app.status
 		return r.Status().Update(ctx, app, opts...)
 	})
 }

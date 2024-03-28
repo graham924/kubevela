@@ -62,16 +62,19 @@ func GetScopeGVK(ctx context.Context, cli client.Reader, dm discoverymapper.Disc
 	return GetGVKFromDefinition(dm, sd.Spec.Reference)
 }
 
-// LoadTemplate Get template according to key
+// LoadTemplate Get template according to key 根据能力类型加载模板，key传过来的是 comp.Type
 func LoadTemplate(ctx context.Context, dm discoverymapper.DiscoveryMapper, cli client.Reader, key string, kd types.CapType) (*Template, error) {
 	// Application Controller only load template from ComponentDefinition and TraitDefinition
 	switch kd {
+	// capability类型为ComponentDefinition
 	case types.TypeComponentDefinition:
 		var schematic *common.Schematic
 		var status *common.Status
 		var extension *runtime.RawExtension
 
+		// 创建一个ComponentDefinition对象
 		cd := new(v1beta1.ComponentDefinition)
+		// 从
 		err := GetDefinition(ctx, cli, cd, key)
 		if err != nil {
 			if kerrors.IsNotFound(err) {
